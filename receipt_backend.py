@@ -9,6 +9,12 @@ from typing import List, Optional
 import google.generativeai as genai
 from PIL import Image
 import io
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+# Get the directory where this script is located
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path=env_path)
 
 app = FastAPI(title="Receipt Parser Backend")
 
@@ -22,7 +28,11 @@ app.add_middleware(
 )
 
 # Gemini API configuration
-genai.configure(api_key="AIzaSyDhPHPZyPX0ByT43-DCgFF5hUqtXm25vjc")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is not set. Please set it in your .env file or environment.")
+
+genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-2.0-flash')
 
 # Data models
