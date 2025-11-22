@@ -1,6 +1,8 @@
-import './ContactsPage.css'
+'use client'
 
-function ContactsPage() {
+import './page.css'
+
+export default function ContactsPage() {
   // Mock data for demonstration
   const contacts = [
     { id: 1, name: 'Alex Johnson', amount: 45.50, type: 'owes' },
@@ -80,6 +82,4 @@ function ContactsPage() {
     </div>
   )
 }
-
-export default ContactsPage
 

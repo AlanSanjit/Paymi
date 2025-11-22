@@ -1,7 +1,9 @@
-import { useRef, useState } from 'react'
-import './ScanPage.css'
+'use client'
 
-function ScanPage() {
+import { useRef, useState } from 'react'
+import './page.css'
+
+export default function Home() {
   const fileInputRef = useRef(null)
   const [isDragging, setIsDragging] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
@@ -96,6 +98,4 @@ function ScanPage() {
     </div>
   )
 }
-
-export default ScanPage
 
