@@ -41,6 +41,7 @@ else:
 db = mongo_client["Paymi"]
 contacts_collection = db["contacts"]
 debts_collection = db["debts"]
+user_debts_collection = db["user_debts"]  # Individualized debt tracking
 
 app = FastAPI(title="Contact Backend")
 
@@ -76,6 +77,8 @@ class SplitConfirmation(BaseModel):
     amount_per_person: float
     total_amount: float
     items: Optional[list] = None
+    sender_email: str  # Email of the person who is splitting the bill
+    sender_name: Optional[str] = None  # Full name of the sender
 
 # Health check endpoint
 @app.get("/health")
@@ -161,63 +164,199 @@ async def add_contact(contact: Contact):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to add contact: {str(e)}")
 
-# Get all contacts with debt information
+# Get all contacts with debt information (individualized per user)
 @app.get("/contacts")
-async def get_contacts():
-    """Get all contacts with their debt information"""
+async def get_contacts(user_email: Optional[str] = None):
+    """Get all contacts with their debt information from the logged-in user's perspective"""
     try:
-        contacts = []
+        # If no user_email provided, return contacts without debt info
+        if not user_email:
+            contacts = []
+            async for contact in contacts_collection.find({}):
+                contact["contact_id"] = str(contact["_id"])
+                contact["_id"] = str(contact["_id"])
+                contact["category"] = "neutral"
+                contact["total_debt"] = 0.0
+                contact["paid_back"] = 0.0
+                if "created_at" in contact and contact["created_at"]:
+                    contact["created_at"] = contact["created_at"].isoformat()
+                contacts.append(contact)
+            return JSONResponse(content={"contacts": contacts})
+        
+        # Get all contacts
+        all_contacts = []
         async for contact in contacts_collection.find({}):
+            all_contacts.append(contact)
+        
+        # Get debts where this user is the creditor (others owe them)
+        owes_me_debts = {}
+        async for debt in user_debts_collection.find({"creditor_email": user_email}):
+            debtor_email = debt.get("debtor_email")
+            if debtor_email:
+                if debtor_email not in owes_me_debts:
+                    owes_me_debts[debtor_email] = {"total": 0.0, "paid_back": 0.0}
+                owes_me_debts[debtor_email]["total"] += debt.get("amount", 0.0)
+                owes_me_debts[debtor_email]["paid_back"] += debt.get("paid_back", 0.0)
+        
+        # Get debts where this user is the debtor (they owe others)
+        i_owe_debts = {}
+        async for debt in user_debts_collection.find({"debtor_email": user_email}):
+            creditor_email = debt.get("creditor_email")
+            creditor_name = debt.get("creditor_name", "")
+            if creditor_email:
+                if creditor_email not in i_owe_debts:
+                    i_owe_debts[creditor_email] = {
+                        "total": 0.0, 
+                        "paid_back": 0.0,
+                        "creditor_name": creditor_name
+                    }
+                i_owe_debts[creditor_email]["total"] += debt.get("amount", 0.0)
+                i_owe_debts[creditor_email]["paid_back"] += debt.get("paid_back", 0.0)
+                # Preserve creditor_name if it's available (use the most recent one if multiple debts exist)
+                if creditor_name and not i_owe_debts[creditor_email].get("creditor_name"):
+                    i_owe_debts[creditor_email]["creditor_name"] = creditor_name
+                elif creditor_name:
+                    # Update if we have a name (prefer non-empty names)
+                    i_owe_debts[creditor_email]["creditor_name"] = creditor_name
+        
+        # Build response with categorized contacts
+        contacts = []
+        
+        # First, process all contacts (excluding the current user)
+        for contact in all_contacts:
             contact_email = contact["email"]
             
-            # Get debt information for this contact
-            debt_info = await debts_collection.find_one({"contact_email": contact_email})
+            # Skip if this contact is the current user
+            if contact_email == user_email:
+                continue
             
-            if debt_info:
-                owes_me = debt_info.get("owes_me", 0.0)
-                i_owe = debt_info.get("i_owe", 0.0)
-                paid_back_to_me = debt_info.get("paid_back_to_me", 0.0)
-                paid_back_by_me = debt_info.get("paid_back_by_me", 0.0)
-                
-                # Calculate net amounts
-                net_owes_me = owes_me - paid_back_to_me
-                net_i_owe = i_owe - paid_back_by_me
-                
-                # Determine category - only categorize as owes_me or i_owe if there's actual outstanding debt
-                # If both are 0 or negative, or if net amounts are exactly 0, put in neutral
-                if net_owes_me > 0:
+            # Check if this contact owes the user
+            if contact_email in owes_me_debts:
+                debt_info = owes_me_debts[contact_email]
+                net_debt = debt_info["total"] - debt_info["paid_back"]
+                if net_debt > 0:
                     category = "owes_me"
-                    total_debt = net_owes_me
-                    paid_back = paid_back_to_me
-                elif net_i_owe > 0:
-                    category = "i_owe"
-                    total_debt = net_i_owe
-                    paid_back = paid_back_by_me
+                    total_debt = net_debt
+                    paid_back = debt_info["paid_back"]
                 else:
-                    # Both net amounts are 0 or negative - no outstanding debt
+                    category = "neutral"
+                    total_debt = 0.0
+                    paid_back = 0.0
+            # Check if user owes this contact (this contact is a creditor)
+            elif contact_email in i_owe_debts:
+                debt_info = i_owe_debts[contact_email]
+                net_debt = debt_info["total"] - debt_info["paid_back"]
+                if net_debt > 0:
+                    category = "i_owe"
+                    total_debt = net_debt
+                    paid_back = debt_info["paid_back"]
+                    # Use creditor_name from debt if available (the person who split the bill)
+                    creditor_name = debt_info.get("creditor_name", "")
+                    if creditor_name:
+                        # Override contact name with creditor name to show who split the bill
+                        name_parts = creditor_name.split(" ", 1)
+                        if len(name_parts) == 2:
+                            contact["first_name"] = name_parts[0]
+                            contact["last_name"] = name_parts[1]
+                        else:
+                            contact["first_name"] = creditor_name
+                            contact["last_name"] = ""
+                else:
                     category = "neutral"
                     total_debt = 0.0
                     paid_back = 0.0
             else:
-                # No debt record exists - definitely neutral
                 category = "neutral"
                 total_debt = 0.0
                 paid_back = 0.0
-                net_owes_me = 0.0
-                net_i_owe = 0.0
             
             contact["contact_id"] = str(contact["_id"])
             contact["_id"] = str(contact["_id"])
             contact["category"] = category
             contact["total_debt"] = total_debt
             contact["paid_back"] = paid_back
-            contact["net_owes_me"] = net_owes_me
-            contact["net_i_owe"] = net_i_owe
             
             if "created_at" in contact and contact["created_at"]:
                 contact["created_at"] = contact["created_at"].isoformat()
             
             contacts.append(contact)
+        
+        # Also add users who owe the current user (who might not be in contacts)
+        users_db = mongo_client["Paymi"]
+        users_collection = users_db["users"]
+        
+        for debtor_email, debt_info in owes_me_debts.items():
+            # Skip if this debtor is the current user
+            if debtor_email == user_email:
+                continue
+            
+            # Check if this debtor is already in contacts
+            debtor_in_contacts = any(c["email"] == debtor_email for c in contacts)
+            if not debtor_in_contacts:
+                # Get debtor info from users collection
+                debtor_user = await users_collection.find_one({"email": debtor_email})
+                
+                if debtor_user:
+                    net_debt = debt_info["total"] - debt_info["paid_back"]
+                    if net_debt > 0:
+                        debtor_contact = {
+                            "email": debtor_email,
+                            "first_name": debtor_user.get("first_name", ""),
+                            "last_name": debtor_user.get("last_name", ""),
+                            "username": debtor_user.get("username", ""),
+                            "wallet_id": debtor_user.get("wallet_address", ""),
+                            "contact_id": str(debtor_user.get("_id", "")),
+                            "_id": str(debtor_user.get("_id", "")),
+                            "category": "owes_me",
+                            "total_debt": net_debt,
+                            "paid_back": debt_info["paid_back"],
+                            "is_user": True  # Flag to indicate this is a user, not a contact
+                        }
+                        contacts.append(debtor_contact)
+        
+        # Also add creditors that the user owes (who might not be in contacts)
+        for creditor_email, debt_info in i_owe_debts.items():
+            # Skip if this creditor is the current user
+            if creditor_email == user_email:
+                continue
+            
+            # Check if this creditor is already in contacts
+            creditor_in_contacts = any(c["email"] == creditor_email for c in contacts)
+            if not creditor_in_contacts:
+                # Get creditor info from users collection
+                creditor_user = await users_collection.find_one({"email": creditor_email})
+                
+                if creditor_user:
+                    net_debt = debt_info["total"] - debt_info["paid_back"]
+                    if net_debt > 0:
+                        # Use creditor_name from debt (the person who split the bill)
+                        creditor_name = debt_info.get("creditor_name", "")
+                        if creditor_name:
+                            name_parts = creditor_name.split(" ", 1)
+                            if len(name_parts) == 2:
+                                first_name = name_parts[0]
+                                last_name = name_parts[1]
+                            else:
+                                first_name = creditor_name
+                                last_name = ""
+                        else:
+                            first_name = creditor_user.get("first_name", "")
+                            last_name = creditor_user.get("last_name", "")
+                        
+                        creditor_contact = {
+                            "email": creditor_email,
+                            "first_name": first_name,
+                            "last_name": last_name,
+                            "username": creditor_user.get("username", ""),
+                            "wallet_id": creditor_user.get("wallet_address", ""),
+                            "contact_id": str(creditor_user.get("_id", "")),
+                            "_id": str(creditor_user.get("_id", "")),
+                            "category": "i_owe",
+                            "total_debt": net_debt,
+                            "paid_back": debt_info["paid_back"],
+                            "is_user": True  # Flag to indicate this is a user, not a contact
+                        }
+                        contacts.append(creditor_contact)
         
         return JSONResponse(content={"contacts": contacts})
     except Exception as e:
@@ -298,10 +437,10 @@ async def record_payment(payment: PaymentUpdate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to record payment: {str(e)}")
 
-# Confirm split bill - update debts for all participants
+# Confirm split bill - update debts for all participants (individualized)
 @app.post("/confirm_split")
 async def confirm_split(split: SplitConfirmation):
-    """Confirm a bill split and update debts for all participants"""
+    """Confirm a bill split and create individualized debt records for all participants"""
     try:
         if not split.participants or len(split.participants) == 0:
             raise HTTPException(status_code=400, detail="At least one participant is required")
@@ -309,57 +448,62 @@ async def confirm_split(split: SplitConfirmation):
         if split.amount_per_person <= 0:
             raise HTTPException(status_code=400, detail="Amount per person must be greater than 0")
         
+        if not split.sender_email:
+            raise HTTPException(status_code=400, detail="Sender email is required")
+        
+        # Get sender's name from users collection
+        users_db = mongo_client["Paymi"]
+        users_collection = users_db["users"]
+        sender_user = await users_collection.find_one({"email": split.sender_email})
+        
+        sender_name = split.sender_name
+        if not sender_name and sender_user:
+            first_name = sender_user.get("first_name", "")
+            last_name = sender_user.get("last_name", "")
+            sender_name = f"{first_name} {last_name}".strip() or sender_user.get("username", "")
+        
         results = []
         
-        # For each participant, add to their debt (they owe the sender)
-        for contact_email in split.participants:
-            # Check if contact exists
-            contact = await contacts_collection.find_one({"email": contact_email})
-            if not contact:
-                results.append({
-                    "contact_email": contact_email,
-                    "status": "error",
-                    "message": f"Contact with email '{contact_email}' not found"
-                })
-                continue
+        # For each participant, create a debt record showing they owe the sender
+        for participant_email in split.participants:
+            # Check if participant exists (could be a contact or a user)
+            # We don't require them to be a contact - they just need to be a user
+            participant_user = await users_collection.find_one({"email": participant_email})
             
-            # Get or create debt record
-            debt_doc = await debts_collection.find_one({"contact_email": contact_email})
+            if not participant_user:
+                # Try contacts collection as fallback
+                participant_contact = await contacts_collection.find_one({"email": participant_email})
+                if not participant_contact:
+                    results.append({
+                        "participant_email": participant_email,
+                        "status": "error",
+                        "message": f"Participant with email '{participant_email}' not found as user or contact"
+                    })
+                    continue
             
-            if debt_doc:
-                # Update existing debt - they owe you more
-                new_owes_me = debt_doc.get("owes_me", 0.0) + split.amount_per_person
-                await debts_collection.update_one(
-                    {"contact_email": contact_email},
-                    {
-                        "$set": {
-                            "owes_me": new_owes_me,
-                            "updated_at": datetime.utcnow()
-                        }
-                    }
-                )
-            else:
-                # Create new debt record
-                debt_doc = {
-                    "contact_email": contact_email,
-                    "owes_me": split.amount_per_person,
-                    "i_owe": 0.0,
-                    "paid_back_to_me": 0.0,
-                    "paid_back_by_me": 0.0,
-                    "created_at": datetime.utcnow(),
-                    "updated_at": datetime.utcnow(),
-                }
-                await debts_collection.insert_one(debt_doc)
+            # Create individualized debt record: participant owes sender
+            debt_doc = {
+                "creditor_email": split.sender_email,  # Who is owed money
+                "creditor_name": sender_name,  # Name of the person who split the bill
+                "debtor_email": participant_email,  # Who owes money
+                "amount": split.amount_per_person,
+                "paid_back": 0.0,
+                "items": split.items or [],
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow(),
+            }
+            
+            await user_debts_collection.insert_one(debt_doc)
             
             results.append({
-                "contact_email": contact_email,
+                "participant_email": participant_email,
                 "status": "success",
                 "amount_added": split.amount_per_person
             })
         
         return JSONResponse(content={
             "status": "success",
-            "message": f"Split confirmed: ${split.amount_per_person} per person for {len(split.participants)} contacts",
+            "message": f"Split confirmed: ${split.amount_per_person} per person for {len(split.participants)} participants",
             "results": results
         })
     except HTTPException:

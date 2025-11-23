@@ -23,7 +23,24 @@ export default function ContactsPage() {
 
   const loadContacts = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8005/contacts')
+      // Get logged-in user's email from localStorage
+      const userStr = localStorage.getItem('user')
+      let userEmail = null
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr)
+          userEmail = user.email
+        } catch (e) {
+          console.error('Error parsing user from localStorage:', e)
+        }
+      }
+      
+      // Build URL with user_email parameter
+      const url = userEmail 
+        ? `http://127.0.0.1:8005/contacts?user_email=${encodeURIComponent(userEmail)}`
+        : 'http://127.0.0.1:8005/contacts'
+      
+      const response = await fetch(url)
       if (!response.ok) {
         throw new Error('Failed to load contacts')
       }

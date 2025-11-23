@@ -48,28 +48,45 @@ export default function SplitBillModal({
 
   const fetchUsers = async () => {
     try {
-      // Fetch contacts instead of users
-      const response = await fetch('http://127.0.0.1:8005/contacts')
+      // Fetch all users from auth backend (registered users)
+      const authApiUrl = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://127.0.0.1:8003'
+      const response = await fetch(`${authApiUrl}/api/users`)
       
       if (!response.ok) {
-        throw new Error('Failed to fetch contacts')
+        throw new Error('Failed to fetch users')
       }
       
       const data = await response.json()
-      // Convert contacts to user format for compatibility
-      const contacts = data.contacts || []
-      const formattedUsers = contacts.map(contact => ({
-        id: contact.email, // Use email as ID
-        email: contact.email,
-        first_name: contact.first_name,
-        last_name: contact.last_name,
-        username: contact.username,
-      }))
+      // Convert users to format for compatibility
+      const usersList = data.users || []
+      
+      // Get current user email to filter them out
+      const userStr = localStorage.getItem('user')
+      let currentUserEmail = null
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr)
+          currentUserEmail = user.email
+        } catch (e) {
+          console.error('Error parsing user from localStorage:', e)
+        }
+      }
+      
+      // Filter out current user from the list (they're shown separately as "You")
+      const formattedUsers = usersList
+        .filter(user => user.email !== currentUserEmail)
+        .map(user => ({
+          id: user.email, // Use email as ID
+          email: user.email,
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          username: user.username || '',
+        }))
       
       setUsers(formattedUsers)
     } catch (err) {
-      setError(err.message || 'Failed to load contacts')
-      console.error('Error fetching contacts:', err)
+      setError(err.message || 'Failed to load users')
+      console.error('Error fetching users:', err)
     }
   }
 
@@ -151,6 +168,13 @@ export default function SplitBillModal({
     setError(null)
 
     try {
+      // Get sender's full name
+      const senderName = currentUser 
+        ? (currentUser.first_name && currentUser.last_name 
+            ? `${currentUser.first_name} ${currentUser.last_name}` 
+            : currentUser.username || currentUser.email)
+        : ''
+      
       // Call backend to update debts for each participant
       // Note: If current user is selected, they pay their share but don't get debt added
       // Only contacts get debt added (they owe the sender)
@@ -164,6 +188,8 @@ export default function SplitBillModal({
           amount_per_person: amountPerPerson,
           total_amount: splitAmount,
           items: selectedItems,
+          sender_email: currentUser?.email || '', // Email of the person splitting the bill
+          sender_name: senderName, // Full name of the sender
           current_user_included: isCurrentUserSelected, // Track if sender is paying their share
         }),
       })
@@ -182,9 +208,12 @@ export default function SplitBillModal({
       // Show success message
       alert(`Split confirmed! ${result.message}`)
       
-      // If on contacts page, reload to show updated debts
+      // Reload contacts page to show updated debts (for both sender and participants)
       if (window.location.pathname === '/contacts') {
         window.location.reload()
+      } else {
+        // If not on contacts page, navigate to it to show the updated debt
+        window.location.href = '/contacts'
       }
     } catch (err) {
       setError(err.message || 'Failed to confirm split')
