@@ -68,7 +68,8 @@ class DebtUpdate(BaseModel):
     description: Optional[str] = None
 
 class PaymentUpdate(BaseModel):
-    contact_email: str
+    contact_email: str  # Creditor's email (who is being paid)
+    debtor_email: str  # Debtor's email (who is making the payment)
     amount: float
     description: Optional[str] = None
 
@@ -406,32 +407,77 @@ async def add_debt(debt: DebtUpdate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to add debt: {str(e)}")
 
-# Record payment (someone paid you back)
+# Record payment (someone paid you back) - updated for user_debts_collection
 @app.post("/record_payment")
 async def record_payment(payment: PaymentUpdate):
-    """Record payment - someone paid you back"""
+    """Record payment - update debt records in user_debts_collection"""
     try:
-        debt_doc = await debts_collection.find_one({"contact_email": payment.contact_email})
-        if not debt_doc:
-            raise HTTPException(status_code=404, detail=f"No debt record found for '{payment.contact_email}'")
+        if not payment.debtor_email:
+            raise HTTPException(status_code=400, detail="debtor_email is required")
         
-        current_owes_me = debt_doc.get("owes_me", 0.0)
-        current_paid_back = debt_doc.get("paid_back_to_me", 0.0)
+        if not payment.contact_email:
+            raise HTTPException(status_code=400, detail="contact_email (creditor_email) is required")
         
-        # Update paid back amount (can't exceed what they owe)
-        new_paid_back = min(current_paid_back + payment.amount, current_owes_me)
+        # Find all debt records where debtor owes creditor
+        debts = []
+        async for debt in user_debts_collection.find({
+            "debtor_email": payment.debtor_email,
+            "creditor_email": payment.contact_email
+        }):
+            debts.append(debt)
         
-        await debts_collection.update_one(
-            {"contact_email": payment.contact_email},
-            {
-                "$set": {
-                    "paid_back_to_me": new_paid_back,
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
+        if not debts:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"No debt records found where {payment.debtor_email} owes {payment.contact_email}"
+            )
         
-        return JSONResponse(content={"status": "success", "message": f"Recorded ${payment.amount} payment"})
+        # Calculate total debt and total paid back
+        total_debt = sum(d.get("amount", 0.0) for d in debts)
+        total_paid_back = sum(d.get("paid_back", 0.0) for d in debts)
+        remaining_debt = total_debt - total_paid_back
+        
+        if payment.amount > remaining_debt:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Payment amount ${payment.amount:.2f} exceeds remaining debt ${remaining_debt:.2f}"
+            )
+        
+        # Distribute payment across debt records (oldest first)
+        remaining_payment = payment.amount
+        
+        for debt in sorted(debts, key=lambda d: d.get("created_at", datetime.utcnow())):
+            if remaining_payment <= 0:
+                break
+            
+            debt_amount = debt.get("amount", 0.0)
+            current_paid = debt.get("paid_back", 0.0)
+            debt_remaining = debt_amount - current_paid
+            
+            if debt_remaining > 0:
+                # Pay as much as possible towards this debt record
+                payment_to_this_debt = min(remaining_payment, debt_remaining)
+                new_paid_back = current_paid + payment_to_this_debt
+                
+                await user_debts_collection.update_one(
+                    {"_id": debt["_id"]},
+                    {
+                        "$set": {
+                            "paid_back": new_paid_back,
+                            "updated_at": datetime.utcnow()
+                        }
+                    }
+                )
+                
+                remaining_payment -= payment_to_this_debt
+        
+        return JSONResponse(content={
+            "status": "success", 
+            "message": f"Recorded ${payment.amount} payment",
+            "total_debt": total_debt,
+            "total_paid_back": total_paid_back + payment.amount,
+            "remaining_debt": remaining_debt - payment.amount
+        })
     except HTTPException:
         raise
     except Exception as e:

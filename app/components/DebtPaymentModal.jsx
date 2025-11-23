@@ -103,13 +103,30 @@ export default function DebtPaymentModal({
       
       // Update debt record on backend
       try {
+        // Get current user's email
+        const userStr = localStorage.getItem('user')
+        let currentUserEmail = null
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr)
+            currentUserEmail = user.email
+          } catch (e) {
+            console.error('Error parsing user from localStorage:', e)
+          }
+        }
+        
+        if (!currentUserEmail) {
+          throw new Error('User email not found')
+        }
+        
         const response = await fetch('http://127.0.0.1:8005/record_payment', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            contact_email: creditor.email,
+            contact_email: creditor.email,  // Creditor's email (who is being paid)
+            debtor_email: currentUserEmail,  // Current user's email (who is making the payment)
             amount: amountNum,
             description: `Payment via PayMi - ${result.signature.substring(0, 20)}...`
           }),
