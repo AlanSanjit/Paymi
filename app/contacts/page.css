@@ -4,7 +4,7 @@
   flex-direction: column;
   align-items: center;
   min-height: calc(100vh - 80px);
-  background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+  background: #FFFFFF;
   padding: 2rem 1rem;
 }
 
@@ -17,10 +17,16 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #FF5E54;
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    -1px 0 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
 }
 
 .contacts-section {
@@ -59,22 +65,21 @@
 }
 
 .contact-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid #FFFFFF;
   border-radius: 16px;
   padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
 }
 
 .contact-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #FFFFFF;
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(63, 14, 128, 0.3);
 }
 
 .owes-card {
@@ -96,13 +101,13 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #ffffff;
+  color: #CDF564;
   flex-shrink: 0;
 }
 
@@ -115,7 +120,16 @@
 .contact-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #ffffff;
+  color: #FF5E54;
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    -1px 0 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
 }
 
 .contact-amount {
@@ -139,24 +153,25 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.7);
+  color: #FF5E54;
+  border: 2px solid #FFFFFF;
 }
 
 .contact-action-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.9);
   transform: scale(1.05);
 }
 
 .pay-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
+  background: #FFFFFF;
+  color: #CDF564;
+  border: 2px solid #FFFFFF;
 }
 
 .pay-btn:hover {
   opacity: 0.9;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(63, 14, 128, 0.4);
 }
 
 .empty-state {
@@ -177,12 +192,31 @@
 .empty-state h2 {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
-  color: #ffffff;
+  color: #FF5E54;
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    -1px 0 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
 }
 
 .empty-state p {
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: #FF5E54;
+  opacity: 0.8;
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    -1px 0 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
 }
 
 @media (max-width: 768px) {

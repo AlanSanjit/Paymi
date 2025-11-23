@@ -196,28 +196,17 @@ async def upload_receipt(file: UploadFile = File(...)):
             receipt_data["receipt_id"] = str(receipt_id)
             print(f"Receipt saved to MongoDB with ID: {receipt_id}")
         except Exception as db_error:
-            # Log the error but don't fail the entire request
+            # Log the error and raise it since we need the database to work
             error_msg = str(db_error)
             print(f"ERROR: Failed to save receipt to MongoDB: {error_msg}")
             # Re-raise if it's a critical error (not just SSL), otherwise continue
             if "SSL" not in error_msg and "handshake" not in error_msg:
                 # If it's not an SSL error, it might be a critical DB issue
                 print(f"Critical database error: {error_msg}")
-            # Continue without the receipt_id in the response
-            # The receipt will still be saved to JSON file below
+                raise HTTPException(status_code=500, detail=f"Failed to save receipt to database: {error_msg}")
+            # For SSL errors, we'll still try to return the data but warn the user
+            print(f"Warning: SSL error occurred but continuing with response")
         # -----------------------------------------------------------------
-
-
-        
-        # Save to JSON file
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        json_filename = f"receipt_{timestamp}.json"
-        json_path = os.path.join(os.path.dirname(__file__), json_filename)
-        
-        with open(json_path, 'w', encoding='utf-8') as f:
-            json.dump(receipt_data, f, indent=2, ensure_ascii=False)
-        
-        print(f"Receipt data saved to {json_filename}")
         
         # Validate response structure
         if "items" not in receipt_data or not isinstance(receipt_data["items"], list):

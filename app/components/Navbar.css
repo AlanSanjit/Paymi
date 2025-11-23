@@ -3,9 +3,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: rgba(10, 10, 10, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #FFFFFF;
+  border-bottom: 3px solid #FF5E54;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -13,11 +12,20 @@
 
 .navbar-logo {
   text-decoration: none;
-  color: #ffffff;
+  color: #FF5E54;
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.5px;
   transition: opacity 0.2s ease;
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    -1px 0 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
 }
 
 .navbar-logo:hover {
@@ -25,10 +33,7 @@
 }
 
 .logo-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #FF5E54;
 }
 
 .navbar-links {
@@ -39,16 +44,25 @@
 
 .navbar-link {
   text-decoration: none;
-  color: #ffffff;
+  color: #FF5E54;
   font-size: 1rem;
   font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   transition: background-color 0.2s ease, opacity 0.2s ease;
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    -1px 0 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
 }
 
 .navbar-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 94, 84, 0.1);
   opacity: 0.9;
 }
 

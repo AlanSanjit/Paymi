@@ -1,0 +1,18 @@
+/* Universal text outline for watermelon color text */
+* {
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    -1px 0 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
+}
+
+/* Override for elements that shouldn't have outline */
+input, textarea, button, select {
+  text-shadow: none;
+}
+

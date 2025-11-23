@@ -189,6 +189,34 @@ async def login_user(login_data: UserLogin):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Login failed: {str(e)}")
 
+# Get all users endpoint (for splitting bills)
+@app.get("/api/users")
+async def get_users():
+    """Get all users from the database (excluding passwords)"""
+    try:
+        # Fetch all users, excluding password field
+        cursor = users_collection.find({}, {"password": 0})
+        users = await cursor.to_list(length=None)
+        
+        # Convert ObjectId to string and format user data
+        users_list = []
+        for user in users:
+            users_list.append({
+                "id": str(user["_id"]),
+                "email": user.get("email", ""),
+                "username": user.get("username", ""),
+                "wallet_address": user.get("wallet_address", ""),
+                "first_name": user.get("first_name", ""),
+                "last_name": user.get("last_name", "")
+            })
+        
+        return {
+            "success": True,
+            "users": users_list
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch users: {str(e)}")
+
 # Health check endpoint
 @app.get("/health")
 async def health_check():

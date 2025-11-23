@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - 80px);
-  background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+  background: #FFFFFF;
   padding: 2rem;
 }
 
@@ -20,9 +20,9 @@
 .dropbox {
   width: 100%;
   min-height: 300px;
-  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border: 2px dashed #FF5E54;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.2);
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -31,18 +31,18 @@
 }
 
 .dropbox:hover {
-  border-color: rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.05);
+  border-color: #FF5E54;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .dropbox.dragging {
-  border-color: rgba(102, 126, 234, 0.6);
-  background: rgba(102, 126, 234, 0.05);
+  border-color: #FF5E54;
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .dropbox.has-file {
-  border-color: rgba(74, 222, 128, 0.4);
-  background: rgba(74, 222, 128, 0.03);
+  border-color: #FF5E54;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .dropbox-content {
@@ -59,7 +59,16 @@
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: #FF5E54;
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    -1px 0 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
 }
 
 .upload-icon {
@@ -85,12 +94,20 @@
 }
 
 .file-name {
-  color: rgba(255, 255, 255, 0.9);
+  color: #FF5E54;
   font-size: 1rem;
   font-weight: 500;
   word-break: break-word;
   max-width: 100%;
   margin: 0;
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
 }
 
 .submit-btn {
@@ -98,18 +115,27 @@
   padding: 1rem 2rem;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #ffffff;
+  background: #FF5E54;
+  color: #FFFFFF;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    -1px 0 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
 }
 
 .submit-btn:hover:not(:disabled) {
   opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 20px rgba(255, 94, 84, 0.4);
 }
 
 .submit-btn:active:not(:disabled) {
