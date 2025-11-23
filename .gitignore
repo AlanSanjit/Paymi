@@ -41,3 +41,11 @@ next-env.d.ts
 *.swo
 *~
 
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+

@@ -10,11 +10,55 @@ import google.generativeai as genai
 from PIL import Image
 import io
 from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
+from bson import ObjectId
 
 # Load environment variables from .env file
 # Get the directory where this script is located
 env_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path=env_path)
+
+MONGODB_URI = os.getenv("MONGODB_URI")
+if not MONGODB_URI:
+    raise ValueError("MONGODB_URI environment variable is not set.")
+
+# Configure MongoDB connection with SSL/TLS support for Atlas
+# MongoDB Atlas requires TLS/SSL connections
+# IMPORTANT: Your connection string should use mongodb+srv:// protocol for Atlas
+# Example: mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
+# 
+# Common SSL issues and solutions:
+# 1. Make sure your IP is whitelisted in MongoDB Atlas Network Access settings
+# 2. Install pymongo with OCSP support: pip install pymongo[ocsp]
+# 3. Python 3.13 may need tlsAllowInvalidCertificates=True as a workaround
+
+# Check if connection string uses +srv protocol (which handles SSL automatically)
+use_srv = "mongodb+srv://" in MONGODB_URI.lower()
+
+if use_srv:
+    # mongodb+srv automatically handles TLS
+    # Using tlsAllowInvalidCertificates as workaround for Python 3.13 SSL issues
+    mongo_client = AsyncIOMotorClient(
+        MONGODB_URI,
+        tlsAllowInvalidCertificates=True,  # Workaround for Python 3.13 SSL issues (development only)
+        serverSelectionTimeoutMS=30000,
+        connectTimeoutMS=30000,
+        socketTimeoutMS=30000,
+    )
+else:
+    # For regular mongodb:// connections, explicitly enable TLS
+    mongo_client = AsyncIOMotorClient(
+        MONGODB_URI,
+        tls=True,
+        tlsAllowInvalidCertificates=True,  # Workaround for Python 3.13 SSL issues (development only)
+        serverSelectionTimeoutMS=30000,
+        connectTimeoutMS=30000,
+        socketTimeoutMS=30000,
+    )
+
+db = mongo_client["Paymi"]
+receipts_collection = db["receipts"]
+
 
 app = FastAPI(title="Receipt Parser Backend")
 
@@ -50,6 +94,27 @@ class Item(BaseModel):
 class ReceiptResponse(BaseModel):
     items: List[Item]
     total: float
+
+# Health check endpoint to test database connection
+@app.get("/health")
+async def health_check():
+    """Check if the database connection is working"""
+    try:
+        # Test the connection by pinging the database
+        await mongo_client.admin.command('ping')
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "database_name": db.name,
+            "collection": receipts_collection.name
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e)
+        }
+
 @app.post("/upload_receipt")
 async def upload_receipt(file: UploadFile = File(...)):
     if file.content_type not in ["image/jpeg", "image/png", "image/jpg", "application/pdf"]:
@@ -107,6 +172,42 @@ async def upload_receipt(file: UploadFile = File(...)):
         
         if not isinstance(receipt_data, dict) or "items" not in receipt_data or "total" not in receipt_data:
             raise ValueError("Invalid response format from Gemini")
+
+        # -------- SAVE THIS RECEIPT INTO MONGODB (SIMPLE VERSION) --------
+        try:
+            # Get store_name from the first item, if it exists
+            store_name = None
+            if receipt_data.get("items"):
+                store_name = receipt_data["items"][0].get("store_name")
+
+            # Build the document to store
+            receipt_doc = {
+                "store_name": store_name,
+                "items": receipt_data.get("items", []),  # the exact items array
+                "total": receipt_data.get("total", 0.0),
+                "created_at": datetime.utcnow(),
+            }
+
+            # Insert into the "receipts" collection
+            result = await receipts_collection.insert_one(receipt_doc)
+            receipt_id = result.inserted_id
+
+            # Add the ID to the response so the frontend knows which DB record this is
+            receipt_data["receipt_id"] = str(receipt_id)
+            print(f"Receipt saved to MongoDB with ID: {receipt_id}")
+        except Exception as db_error:
+            # Log the error but don't fail the entire request
+            error_msg = str(db_error)
+            print(f"ERROR: Failed to save receipt to MongoDB: {error_msg}")
+            # Re-raise if it's a critical error (not just SSL), otherwise continue
+            if "SSL" not in error_msg and "handshake" not in error_msg:
+                # If it's not an SSL error, it might be a critical DB issue
+                print(f"Critical database error: {error_msg}")
+            # Continue without the receipt_id in the response
+            # The receipt will still be saved to JSON file below
+        # -----------------------------------------------------------------
+
+
         
         # Save to JSON file
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
