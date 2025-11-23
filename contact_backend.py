@@ -235,11 +235,13 @@ async def get_contacts(user_email: Optional[str] = None):
             if contact_email in owes_me_debts:
                 debt_info = owes_me_debts[contact_email]
                 net_debt = debt_info["total"] - debt_info["paid_back"]
-                if net_debt > 0:
+                # Use a small epsilon to handle floating point precision
+                if net_debt > 0.01:  # If more than 1 cent remaining
                     category = "owes_me"
                     total_debt = net_debt
                     paid_back = debt_info["paid_back"]
                 else:
+                    # Debt is fully paid or overpaid - move to neutral
                     category = "neutral"
                     total_debt = 0.0
                     paid_back = 0.0
@@ -247,7 +249,8 @@ async def get_contacts(user_email: Optional[str] = None):
             elif contact_email in i_owe_debts:
                 debt_info = i_owe_debts[contact_email]
                 net_debt = debt_info["total"] - debt_info["paid_back"]
-                if net_debt > 0:
+                # Use a small epsilon to handle floating point precision
+                if net_debt > 0.01:  # If more than 1 cent remaining
                     category = "i_owe"
                     total_debt = net_debt
                     paid_back = debt_info["paid_back"]
@@ -263,6 +266,7 @@ async def get_contacts(user_email: Optional[str] = None):
                             contact["first_name"] = creditor_name
                             contact["last_name"] = ""
                 else:
+                    # Debt is fully paid or overpaid - move to neutral
                     category = "neutral"
                     total_debt = 0.0
                     paid_back = 0.0
@@ -299,7 +303,8 @@ async def get_contacts(user_email: Optional[str] = None):
                 
                 if debtor_user:
                     net_debt = debt_info["total"] - debt_info["paid_back"]
-                    if net_debt > 0:
+                    # Only add if there's still outstanding debt (more than 1 cent)
+                    if net_debt > 0.01:
                         debtor_contact = {
                             "email": debtor_email,
                             "first_name": debtor_user.get("first_name", ""),
@@ -329,7 +334,8 @@ async def get_contacts(user_email: Optional[str] = None):
                 
                 if creditor_user:
                     net_debt = debt_info["total"] - debt_info["paid_back"]
-                    if net_debt > 0:
+                    # Only add if there's still outstanding debt (more than 1 cent)
+                    if net_debt > 0.01:
                         # Use creditor_name from debt (the person who split the bill)
                         creditor_name = debt_info.get("creditor_name", "")
                         if creditor_name:
