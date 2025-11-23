@@ -38,8 +38,8 @@ export default function SplitBillModal({
       fetchUsers()
     } else {
       // Reset state when modal closes
-      setIsCurrentUserSelected(false)
       setSelectedUsers([])
+      setIsCurrentUserSelected(false)
       setSplitType(null)
       setCustomAmount('')
       setError(null)
@@ -48,30 +48,28 @@ export default function SplitBillModal({
 
   const fetchUsers = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://127.0.0.1:8003'
-      const response = await fetch(`${apiUrl}/api/users`)
+      // Fetch contacts instead of users
+      const response = await fetch('http://127.0.0.1:8005/contacts')
       
       if (!response.ok) {
-        throw new Error('Failed to fetch users')
+        throw new Error('Failed to fetch contacts')
       }
       
       const data = await response.json()
-      // Filter out the current user from the list
-      const userStr = localStorage.getItem('user')
-      if (userStr) {
-        try {
-          const currentUser = JSON.parse(userStr)
-          const otherUsers = (data.users || []).filter(user => user.id !== currentUser.id)
-          setUsers(otherUsers)
-        } catch (e) {
-          setUsers(data.users || [])
-        }
-      } else {
-        setUsers(data.users || [])
-      }
+      // Convert contacts to user format for compatibility
+      const contacts = data.contacts || []
+      const formattedUsers = contacts.map(contact => ({
+        id: contact.email, // Use email as ID
+        email: contact.email,
+        first_name: contact.first_name,
+        last_name: contact.last_name,
+        username: contact.username,
+      }))
+      
+      setUsers(formattedUsers)
     } catch (err) {
-      setError(err.message || 'Failed to load users')
-      console.error('Error fetching users:', err)
+      setError(err.message || 'Failed to load contacts')
+      console.error('Error fetching contacts:', err)
     }
   }
 
@@ -92,6 +90,7 @@ export default function SplitBillModal({
     setIsCurrentUserSelected(prev => !prev)
   }
 
+
   const calculateSplitAmount = () => {
     if (splitType === '50') {
       return selectedTotal * 0.5
@@ -104,7 +103,7 @@ export default function SplitBillModal({
     return 0
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!splitType) {
       setError('Please select a split option')
       return
@@ -115,7 +114,7 @@ export default function SplitBillModal({
       return
     }
 
-    // Count total participants: current user (if selected) + other selected users
+    // Count total participants: current user (if selected) + selected contacts
     const totalParticipants = (isCurrentUserSelected ? 1 : 0) + selectedUsers.length
     
     if (totalParticipants === 0) {
@@ -126,30 +125,73 @@ export default function SplitBillModal({
     const splitAmount = calculateSplitAmount()
     const amountPerPerson = splitAmount / totalParticipants
 
-    // Here you would save the split to the database
+    // Get all participants (current user if selected + selected contacts)
     const allParticipants = []
+    
+    // If current user is selected, we still need to track them for the split calculation
+    // but we won't add debt for them (they're the sender)
     if (isCurrentUserSelected && currentUser) {
-      allParticipants.push(currentUser)
+      // Current user is included in the split but doesn't get debt added
+      // They're paying their share, so we don't need to track it as debt
     }
+    
+    // Add selected contacts (these will get debt added)
     selectedUsers.forEach(userId => {
       const user = users.find(u => u.id === userId)
       if (user) allParticipants.push(user)
     })
 
-    console.log('Split Details:', {
-      items: selectedItems,
-      splitType,
-      splitAmount,
-      amountPerPerson,
-      totalParticipants,
-      participants: allParticipants,
-      currentUserIncluded: isCurrentUserSelected,
-      totalSelected: selectedTotal
-    })
+    // We need at least one participant (either current user or contacts)
+    if (allParticipants.length === 0 && !isCurrentUserSelected) {
+      setError('Please select at least one person to split with')
+      return
+    }
 
-    // Close modal and reset
-    onClose()
-    // You can add a success message or callback here
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // Call backend to update debts for each participant
+      // Note: If current user is selected, they pay their share but don't get debt added
+      // Only contacts get debt added (they owe the sender)
+      const response = await fetch('http://127.0.0.1:8005/confirm_split', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          participants: allParticipants.map(p => p.email), // Send contact emails (not current user)
+          amount_per_person: amountPerPerson,
+          total_amount: splitAmount,
+          items: selectedItems,
+          current_user_included: isCurrentUserSelected, // Track if sender is paying their share
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || 'Failed to confirm split')
+      }
+
+      const result = await response.json()
+      console.log('Split confirmed:', result)
+
+      // Close modal and reset
+      onClose()
+      
+      // Show success message
+      alert(`Split confirmed! ${result.message}`)
+      
+      // If on contacts page, reload to show updated debts
+      if (window.location.pathname === '/contacts') {
+        window.location.reload()
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to confirm split')
+      console.error('Error confirming split:', err)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (!isOpen) return null
@@ -261,10 +303,10 @@ export default function SplitBillModal({
                   </div>
                 )}
 
-                {/* Other Users */}
+                {/* Contacts */}
                 {users.length === 0 ? (
                   <p style={{ color: '#6b7280', padding: '1rem', textAlign: 'center' }}>
-                    {currentUser ? 'No other users available' : 'Loading users...'}
+                    No contacts available. Add contacts first.
                   </p>
                 ) : (
                   users.map((user) => (
@@ -309,9 +351,9 @@ export default function SplitBillModal({
           <button 
             className="confirm-btn" 
             onClick={handleConfirm}
-            disabled={!splitType || totalParticipants === 0}
+            disabled={!splitType || totalParticipants === 0 || isLoading}
           >
-            Confirm Split
+            {isLoading ? 'Processing...' : 'Confirm Split'}
           </button>
         </div>
       </div>
