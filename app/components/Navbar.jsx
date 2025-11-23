@@ -7,6 +7,9 @@ export default function Navbar() {
       <Link href="/" className="navbar-logo">
         <span className="logo-text">Paymi</span>
       </Link>
+      <Link href="/payments" className="navbar-link">
+        Payments
+      </Link>
       <Link href="/contacts" className="navbar-link">
         Contact
       </Link>

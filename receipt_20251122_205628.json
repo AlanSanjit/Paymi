@@ -1,0 +1,221 @@
+{
+  "items": [
+    {
+      "store_name": "STORE 1079",
+      "item_name": "ENTYSAS2 4",
+      "quantity": 1,
+      "subtotal": 4.98,
+      "tax_code": "J",
+      "tax_amount": 0.6474,
+      "total": 5.6274
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "NUTELLA 725G",
+      "quantity": 1,
+      "subtotal": 6.97,
+      "tax_code": "D",
+      "tax_amount": 0.0,
+      "total": 6.97
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "PAL ORI 828",
+      "quantity": 1,
+      "subtotal": 1.97,
+      "tax_code": "J",
+      "tax_amount": 0.2561,
+      "total": 2.2261
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "TIDEHEORG107",
+      "quantity": 1,
+      "subtotal": 24.97,
+      "tax_code": "J",
+      "tax_amount": 3.2461,
+      "total": 28.2161
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "CHRMNSF4",
+      "quantity": 1,
+      "subtotal": 7.47,
+      "tax_code": "J",
+      "tax_amount": 0.9711,
+      "total": 8.4411
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "PEARS BAR 3X",
+      "quantity": 1,
+      "subtotal": 3.47,
+      "tax_code": "J",
+      "tax_amount": 0.4511,
+      "total": 3.9211
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "WHT GRAN SUG",
+      "quantity": 1,
+      "subtotal": 2.97,
+      "tax_code": "D",
+      "tax_amount": 0.0,
+      "total": 2.97
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "GV ZPR SANDW",
+      "quantity": 1,
+      "subtotal": 3.47,
+      "tax_code": "J",
+      "tax_amount": 0.4511,
+      "total": 3.9211
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "90G POUF",
+      "quantity": 1,
+      "subtotal": 3.0,
+      "tax_code": "J",
+      "tax_amount": 0.39,
+      "total": 3.39
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "NF POP UP",
+      "quantity": 1,
+      "subtotal": 5.97,
+      "tax_code": "J",
+      "tax_amount": 0.7761,
+      "total": 6.7461
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "TAL 4PK",
+      "quantity": 1,
+      "subtotal": 3.97,
+      "tax_code": "J",
+      "tax_amount": 0.5161,
+      "total": 4.4861
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "PALOMA 180Z",
+      "quantity": 1,
+      "subtotal": 5.23,
+      "tax_code": "J",
+      "tax_amount": 0.68,
+      "total": 5.91
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "BOWL",
+      "quantity": 1,
+      "subtotal": 5.93,
+      "tax_code": "J",
+      "tax_amount": 0.7709,
+      "total": 6.7009
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "CCSERVINGBWL",
+      "quantity": 1,
+      "subtotal": 8.38,
+      "tax_code": "J",
+      "tax_amount": 1.0894,
+      "total": 9.4694
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "GV GF FUSILL",
+      "quantity": 1,
+      "subtotal": 2.27,
+      "tax_code": "D",
+      "tax_amount": 0.0,
+      "total": 2.27
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "MS10X14BOARD",
+      "quantity": 1,
+      "subtotal": 7.97,
+      "tax_code": "J",
+      "tax_amount": 1.0361,
+      "total": 9.0061
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "GILD-HARV 250",
+      "quantity": 1,
+      "subtotal": 12.27,
+      "tax_code": "J",
+      "tax_amount": 1.5951,
+      "total": 13.8651
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "TAL 2FK",
+      "quantity": 1,
+      "subtotal": 4.97,
+      "tax_code": "J",
+      "tax_amount": 0.6461,
+      "total": 5.6161
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "SHOPPING BAG",
+      "quantity": 1,
+      "subtotal": 2.97,
+      "tax_code": "J",
+      "tax_amount": 0.3861,
+      "total": 3.3561
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "SANDALS",
+      "quantity": 1,
+      "subtotal": 10.0,
+      "tax_code": "J",
+      "tax_amount": 1.3,
+      "total": 11.3
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "BROWN 18",
+      "quantity": 1,
+      "subtotal": 6.98,
+      "tax_code": "D",
+      "tax_amount": 0.0,
+      "total": 6.98
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "GV MIX VEG",
+      "quantity": 1,
+      "subtotal": 2.47,
+      "tax_code": "D",
+      "tax_amount": 0.0,
+      "total": 2.47
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "CHK BST BNLS",
+      "quantity": 1,
+      "subtotal": 4.0,
+      "tax_code": "D",
+      "tax_amount": 0.0,
+      "total": 4.0
+    },
+    {
+      "store_name": "STORE 1079",
+      "item_name": "GV WHITE 675",
+      "quantity": 1,
+      "subtotal": 1.97,
+      "tax_code": "D",
+      "tax_amount": 0.0,
+      "total": 1.97
+    }
+  ],
+  "total": 181.13
+}

@@ -5,11 +5,20 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "powershell -Command \"if (Test-Path .next) { Remove-Item -Recurse -Force .next }; if (Test-Path node_modules/.cache) { Remove-Item -Recurse -Force node_modules/.cache }; next dev\"",
+    "dev:turbo": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "powershell -Command \"if (Test-Path .next) { Remove-Item -Recurse -Force .next }; if (Test-Path node_modules/.cache) { Remove-Item -Recurse -Force node_modules/.cache }; Write-Host 'Cache cleared'\"",
+    "solana:dev": "node solana_backend.js",
+    "solana:start": "node solana_backend.js"
   },
   "dependencies": {
+    "@solana/web3.js": "^1.98.4",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.1",
     "mongodb": "^7.0.0",
     "next": "^14.0.4",
     "react": "^18.2.0",
