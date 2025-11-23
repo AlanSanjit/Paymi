@@ -113,23 +113,15 @@
 .submit-btn {
   width: 100%;
   padding: 1rem 2rem;
-  border: none;
+  border: 3px solid #FF5E54;
   border-radius: 12px;
   background: #FF5E54;
   color: #FFFFFF;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  text-shadow: 
-    -1px -1px 0 #FFFFFF,
-    1px -1px 0 #FFFFFF,
-    -1px 1px 0 #FFFFFF,
-    1px 1px 0 #FFFFFF,
-    -1px 0 0 #FFFFFF,
-    1px 0 0 #FFFFFF,
-    0 -1px 0 #FFFFFF,
-    0 1px 0 #FFFFFF;
+  text-shadow: none;
 }
 
 .submit-btn:hover:not(:disabled) {

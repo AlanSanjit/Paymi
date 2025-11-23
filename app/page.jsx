@@ -193,12 +193,13 @@ export default function Home() {
                     padding: '0.75rem 1.5rem',
                     background: '#FF5E54',
                     color: '#FFFFFF',
-                    border: '2px solid #FF5E54',
+                    border: '3px solid #FF5E54',
                     borderRadius: '8px',
                     cursor: 'pointer',
-                    fontWeight: '600',
+                    fontWeight: '500',
                     fontSize: '0.95rem',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+                    textShadow: 'none'
                   }}
                 >
                   Split Bill ({selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'})

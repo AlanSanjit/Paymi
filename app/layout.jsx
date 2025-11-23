@@ -4,7 +4,7 @@ import LayoutWrapper from './components/LayoutWrapper'
 import './globals.css'
 
 export const metadata = {
-  title: 'Paymi - Split Receipts Effortlessly',
+  title: 'PayMi - Split Receipts Effortlessly',
   description: 'AI-powered receipt splitting application with Solana Pay integration',
 }
 

@@ -4,7 +4,7 @@
   box-sizing: border-box;
 }
 
-/* Add text outline to all text elements with watermelon color */
+/* Add text outline to coral red text on white backgrounds only */
 h1, h2, h3, h4, h5, h6, p, span, div, label, a, li, td, th {
   text-shadow: 
     -1px -1px 0 #FFFFFF,
@@ -17,7 +17,7 @@ h1, h2, h3, h4, h5, h6, p, span, div, label, a, li, td, th {
     0 1px 0 #FFFFFF;
 }
 
-/* Remove outline from form inputs and buttons to avoid double outlines */
+/* Remove outline from form inputs */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -27,17 +27,18 @@ select {
   text-shadow: none !important;
 }
 
-/* Buttons should keep outline for their text */
+/* Buttons with coral red background should have white text without outline */
 button {
-  text-shadow: 
-    -1px -1px 0 #FFFFFF,
-    1px -1px 0 #FFFFFF,
-    -1px 1px 0 #FFFFFF,
-    1px 1px 0 #FFFFFF,
-    -1px 0 0 #FFFFFF,
-    1px 0 0 #FFFFFF,
-    0 -1px 0 #FFFFFF,
-    0 1px 0 #FFFFFF;
+  text-shadow: none;
+}
+
+/* White text on colored backgrounds should not have outline */
+[style*="background: #FF5E54"] *,
+[style*="background:#FF5E54"] *,
+.background-coral *,
+button[style*="background: #FF5E54"],
+button[style*="background:#FF5E54"] {
+  text-shadow: none !important;
 }
 
 body {

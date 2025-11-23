@@ -197,14 +197,15 @@
   padding: 1rem;
   background: #FF5E54;
   color: #FFFFFF;
-  border: none;
+  border: 3px solid #FF5E54;
   border-radius: 10px;
   cursor: pointer;
   font-size: 1.05rem;
-  font-weight: 600;
+  font-weight: 500;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(255, 94, 84, 0.4);
   margin-top: 0.5rem;
+  text-shadow: none;
 }
 
 .submit-btn:hover:not(:disabled) {

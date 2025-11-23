@@ -19,7 +19,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <Link href="/" className="navbar-logo">
-        <span className="logo-text">Paymi</span>
+        <span className="logo-text">PayMi</span>
       </Link>
       <div className="navbar-links">
         <Link href="/payments" className="navbar-link">

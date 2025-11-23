@@ -133,7 +133,7 @@ export default function LoginPage() {
     <div className="login-page">
       <div className="login-container">
         <div className="login-card">
-          <h1 className="login-title">Paymi</h1>
+          <h1 className="login-title">PayMi</h1>
           <p className="login-subtitle">
             {isSignUp ? 'Create your account' : 'Welcome back'}
           </p>

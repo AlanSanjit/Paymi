@@ -171,17 +171,28 @@
   gap: 0.5rem;
   color: #FF5E54;
   font-weight: 500;
+  text-shadow: 
+    -1px -1px 0 #FFFFFF,
+    1px -1px 0 #FFFFFF,
+    -1px 1px 0 #FFFFFF,
+    1px 1px 0 #FFFFFF,
+    -1px 0 0 #FFFFFF,
+    1px 0 0 #FFFFFF,
+    0 -1px 0 #FFFFFF,
+    0 1px 0 #FFFFFF;
 }
 
 .split-option-btn:hover {
-  border-color: #FFFFFF;
+  border-color: #FF5E54;
   background: rgba(255, 255, 255, 0.9);
 }
 
 .split-option-btn.active {
-  border-color: #FFFFFF;
+  border-color: #FF5E54;
   background: #FF5E54;
   color: #FFFFFF;
+  text-shadow: none !important;
+  font-weight: 500;
 }
 
 .split-amount {
@@ -192,8 +203,9 @@
 }
 
 .split-option-btn.active .split-amount {
-  color: #FF5E54;
-  opacity: 1;
+  color: #FFFFFF;
+  opacity: 0.9;
+  text-shadow: none !important;
 }
 
 .custom-amount-input {
@@ -312,8 +324,8 @@
 }
 
 .user-item.selected .user-avatar {
-  background: #FF5E54;
-  color: #FFFFFF;
+  background: #FFFFFF;
+  color: #FF5E54;
 }
 
 .user-info {
@@ -337,6 +349,8 @@
 
 .user-item.selected .user-name {
   color: #FFFFFF;
+  text-shadow: none !important;
+  font-weight: 500;
 }
 
 .user-email {
@@ -356,7 +370,8 @@
 
 .user-item.selected .user-email {
   color: #FFFFFF;
-  opacity: 0.9;
+  opacity: 0.95;
+  text-shadow: none !important;
 }
 
 .user-checkbox {
@@ -435,6 +450,9 @@
 .confirm-btn {
   background: #FF5E54;
   color: #FFFFFF;
+  border: 3px solid #FF5E54;
+  text-shadow: none;
+  font-weight: 500;
 }
 
 .confirm-btn:hover:not(:disabled) {
