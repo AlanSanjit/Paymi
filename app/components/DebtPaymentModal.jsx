@@ -41,8 +41,8 @@ export default function DebtPaymentModal({
           loadBalance(pubkey)
         }
       }
-      // Set default amount to remaining debt
-      setAmount(remainingDebt.toFixed(2))
+      // Set default amount to empty (user can choose to pay full or partial)
+      setAmount('')
       setError(null)
       setSuccess(null)
     }
@@ -68,6 +68,44 @@ export default function DebtPaymentModal({
     }
   }
 
+  const handlePayFullAmount = () => {
+    setAmount(remainingDebt.toFixed(2))
+    setError(null)
+  }
+
+  const handleAmountChange = (e) => {
+    const value = e.target.value
+    
+    // Allow empty input
+    if (value === '') {
+      setAmount('')
+      setError(null)
+      return
+    }
+    
+    // Parse the input value
+    const numValue = parseFloat(value)
+    
+    // If it's a valid number
+    if (!isNaN(numValue)) {
+      // Cap at remaining debt
+      if (numValue > remainingDebt) {
+        setAmount(remainingDebt.toFixed(2))
+        setError(`Amount cannot exceed remaining debt of $${remainingDebt.toFixed(2)}`)
+      } else if (numValue <= 0) {
+        setAmount(value) // Allow typing, but validation will catch it on submit
+        setError(null)
+      } else {
+        setAmount(value)
+        setError(null)
+      }
+    } else {
+      // Allow typing (for cases like "0." or "-")
+      setAmount(value)
+      setError(null)
+    }
+  }
+
   const handleSendPayment = async () => {
     if (!walletAddress || !creditorWallet || !amount) {
       setError('Please fill in all fields')
@@ -76,14 +114,19 @@ export default function DebtPaymentModal({
 
     const amountNum = parseFloat(amount)
     if (isNaN(amountNum) || amountNum <= 0) {
-      setError('Please enter a valid amount')
+      setError('Please enter a valid amount greater than $0.00')
       return
     }
 
-    if (amountNum > remainingDebt) {
+    // Ensure amount doesn't exceed remaining debt (with small tolerance for floating point)
+    const maxAmount = remainingDebt + 0.01 // Small tolerance for floating point precision
+    if (amountNum > maxAmount) {
       setError(`Amount cannot exceed remaining debt of $${remainingDebt.toFixed(2)}`)
       return
     }
+    
+    // Cap the amount at remaining debt if somehow it's slightly over
+    const finalAmount = Math.min(amountNum, remainingDebt)
 
     setIsLoading(true)
     setError(null)
@@ -97,7 +140,7 @@ export default function DebtPaymentModal({
       // Note: In production, fetch current SOL/USD rate from an API (e.g., CoinGecko, CoinMarketCap)
       // For now using a placeholder rate: 1 SOL = $150 (adjust as needed)
       const SOL_PRICE_USD = 150 // Current SOL price in USD - should be fetched dynamically
-      const solAmount = amountNum / SOL_PRICE_USD
+      const solAmount = finalAmount / SOL_PRICE_USD
       
       const result = await sendPayment(walletAddress, creditorWallet, solAmount)
       
@@ -127,7 +170,7 @@ export default function DebtPaymentModal({
           body: JSON.stringify({
             contact_email: creditor.email,  // Creditor's email (who is being paid)
             debtor_email: currentUserEmail,  // Current user's email (who is making the payment)
-            amount: amountNum,
+            amount: finalAmount,
             description: `Payment via PayMi - ${result.signature.substring(0, 20)}...`
           }),
         })
@@ -151,7 +194,7 @@ export default function DebtPaymentModal({
       // Call onPaymentSuccess callback after a delay to allow user to see success message
       setTimeout(() => {
         if (onPaymentSuccess) {
-          onPaymentSuccess(amountNum)
+          onPaymentSuccess(finalAmount)
         }
         onClose()
       }, 3000)
@@ -236,23 +279,33 @@ export default function DebtPaymentModal({
                 <label htmlFor="payment-amount">
                   Payment Amount (USD):
                 </label>
-                <input
-                  id="payment-amount"
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder={remainingDebt.toFixed(2)}
-                  step="0.01"
-                  min="0"
-                  max={remainingDebt}
-                  disabled={isLoading}
-                />
-                <small>Maximum: ${remainingDebt.toFixed(2)}</small>
+                <div className="amount-input-wrapper">
+                  <input
+                    id="payment-amount"
+                    type="number"
+                    value={amount}
+                    onChange={handleAmountChange}
+                    placeholder={`Enter amount (max: $${remainingDebt.toFixed(2)})`}
+                    step="0.01"
+                    min="0"
+                    max={remainingDebt}
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={handlePayFullAmount}
+                    disabled={isLoading}
+                    className="pay-full-btn"
+                  >
+                    Pay Full
+                  </button>
+                </div>
+                <small>Maximum: ${remainingDebt.toFixed(2)} (Remaining Debt)</small>
               </div>
 
               <button
                 onClick={handleSendPayment}
-                disabled={isLoading || !amount || !creditorWallet || parseFloat(amount) <= 0 || parseFloat(amount) > remainingDebt}
+                disabled={isLoading || !amount || !creditorWallet || parseFloat(amount) <= 0 || parseFloat(amount) > (remainingDebt + 0.01)}
                 className="send-payment-btn"
               >
                 {isLoading ? 'Processing...' : 'Send Payment via PayMi'}

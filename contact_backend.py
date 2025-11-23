@@ -104,7 +104,18 @@ async def health_check():
 async def add_contact(contact: Contact):
     """Add a new contact to the database"""
     try:
-        # Check if email already exists (since it's the primary key)
+        # First, check if the email is registered in the users collection
+        users_db = mongo_client["Paymi"]
+        users_collection = users_db["users"]
+        registered_user = await users_collection.find_one({"email": contact.email})
+        
+        if not registered_user:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Email '{contact.email}' is not registered. Only registered users can be added as contacts."
+            )
+        
+        # Check if email already exists in contacts (since it's the primary key)
         existing_contact = await contacts_collection.find_one({"email": contact.email})
         if existing_contact:
             raise HTTPException(
@@ -189,6 +200,14 @@ async def get_contacts(user_email: Optional[str] = None):
         async for contact in contacts_collection.find({}):
             all_contacts.append(contact)
         
+        # Debug: Log all contacts found
+        print(f"[DEBUG] Found {len(all_contacts)} contacts in database")
+        print(f"[DEBUG] Current user email: {user_email}")
+        for contact in all_contacts:
+            contact_email = contact.get('email', '')
+            will_be_filtered = contact_email.lower() == user_email.lower() if user_email else False
+            print(f"[DEBUG] Contact: {contact.get('first_name')} {contact.get('last_name')} ({contact_email}), will be filtered: {will_be_filtered}")
+        
         # Get debts where this user is the creditor (others owe them)
         owes_me_debts = {}
         async for debt in user_debts_collection.find({"creditor_email": user_email}):
@@ -225,10 +244,11 @@ async def get_contacts(user_email: Optional[str] = None):
         
         # First, process all contacts (excluding the current user)
         for contact in all_contacts:
-            contact_email = contact["email"]
+            contact_email = contact.get("email", "")
             
-            # Skip if this contact is the current user
-            if contact_email == user_email:
+            # Skip if this contact is the current user (case-insensitive comparison)
+            if user_email and contact_email.lower() == user_email.lower():
+                print(f"[DEBUG] Skipping contact {contact_email} because it matches logged-in user {user_email}")
                 continue
             
             # Check if this contact owes the user

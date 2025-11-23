@@ -204,16 +204,48 @@
     0 1px 0 #FFFFFF;
 }
 
+.amount-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
 .amount-input-group input {
   padding: 0.75rem;
   border: 3px solid #FF5E54;
   border-radius: 8px;
   font-size: 1rem;
-  width: 100%;
+  flex: 1;
   box-sizing: border-box;
   color: #FF5E54;
   background: white;
   text-shadow: none;
+}
+
+.pay-full-btn {
+  padding: 0.75rem 1.5rem;
+  background: #FF5E54;
+  color: white;
+  border: 3px solid #FF5E54;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-shadow: none;
+}
+
+.pay-full-btn:hover:not(:disabled) {
+  background: #e04a44;
+  border-color: #e04a44;
+}
+
+.pay-full-btn:disabled {
+  background: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+  color: #999;
 }
 
 .amount-input-group input:focus {

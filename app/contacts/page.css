@@ -119,14 +119,6 @@
   text-shadow: none;
 }
 
-.owes-title .count-badge {
-  background: #22c55e;
-}
-
-.owed-title .count-badge {
-  background: #ef4444;
-}
-
 .contacts-list {
   display: flex;
   flex-direction: column;
@@ -159,7 +151,7 @@
 }
 
 .neutral-card {
-  border-left: 3px solid #FF5E54;
+  border: 3px solid #9ca3af;
 }
 
 .contact-info {

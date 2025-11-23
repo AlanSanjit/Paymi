@@ -26,12 +26,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     setPhantomInstalled(isPhantomInstalled())
-    if (isConnected()) {
-      const pubkey = getPublicKey()
-      if (pubkey) {
-        setWalletAddress(pubkey)
-      }
-    }
+    // Don't auto-connect wallet on login page - user must manually connect
+    // This ensures they re-confirm the connection after logout
+    setWalletAddress('')
   }, [])
 
   const handleConnectWallet = async () => {
