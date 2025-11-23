@@ -1,0 +1,233 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+  padding: 2rem;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 450px;
+}
+
+.login-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.login-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+}
+
+.login-subtitle {
+  color: #6b7280;
+  text-align: center;
+  margin: 0 0 2rem 0;
+  font-size: 1rem;
+}
+
+.phantom-warning {
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.phantom-warning p {
+  color: #92400e;
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.install-link {
+  color: #512DA8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.install-link:hover {
+  text-decoration: underline;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  color: #000000;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.875rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  fontSize: 0.95rem;
+  color: #000000;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #512DA8;
+}
+
+.connect-wallet-btn {
+  width: 100%;
+  padding: 0.875rem;
+  background: linear-gradient(135deg, #512DA8 0%, #7B2CBF 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(81, 45, 168, 0.4);
+}
+
+.connect-wallet-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(81, 45, 168, 0.5);
+}
+
+.connect-wallet-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wallet-connected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem;
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+  border-radius: 8px;
+}
+
+.wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wallet-icon {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.wallet-address {
+  color: #000000;
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.wallet-disconnect {
+  padding: 0.5rem 1rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.wallet-disconnect:hover {
+  background: #dc2626;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  margin-top: 0.5rem;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-message {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 0.875rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.form-footer {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.toggle-mode {
+  background: none;
+  border: none;
+  color: #512DA8;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.toggle-mode:hover {
+  color: #7B2CBF;
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .login-title {
+    font-size: 2rem;
+  }
+}
+

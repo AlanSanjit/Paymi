@@ -31,6 +31,12 @@
   background-clip: text;
 }
 
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .navbar-link {
   text-decoration: none;
   color: #ffffff;
@@ -46,6 +52,23 @@
   opacity: 0.9;
 }
 
+.logout-btn {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem;
@@ -55,7 +78,16 @@
     font-size: 1.25rem;
   }
   
+  .navbar-links {
+    gap: 0.25rem;
+  }
+  
   .navbar-link {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .logout-btn {
     font-size: 0.9rem;
     padding: 0.4rem 0.8rem;
   }

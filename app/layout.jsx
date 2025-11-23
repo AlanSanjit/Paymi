@@ -1,4 +1,6 @@
 import Navbar from './components/Navbar'
+import AuthGuard from './components/AuthGuard'
+import LayoutWrapper from './components/LayoutWrapper'
 import './globals.css'
 
 export const metadata = {
@@ -10,10 +12,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <div className="app">
-          <Navbar />
-          {children}
-        </div>
+        <AuthGuard>
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
+        </AuthGuard>
       </body>
     </html>
   )
