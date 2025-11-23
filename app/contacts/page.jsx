@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import DebtPaymentModal from '../components/DebtPaymentModal'
 import './page.css'
 
 export default function ContactsPage() {
@@ -8,6 +9,8 @@ export default function ContactsPage() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [selectedCreditor, setSelectedCreditor] = useState(null)
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -300,7 +303,6 @@ export default function ContactsPage() {
                         </div>
                       </div>
                     </div>
-                    <button className="contact-action-btn">Request</button>
                   </div>
                 )
               })}
@@ -349,7 +351,15 @@ export default function ContactsPage() {
                         </div>
                       </div>
                     </div>
-                    <button className="contact-action-btn pay-btn">Pay</button>
+                    <button 
+                      className="contact-action-btn pay-btn"
+                      onClick={() => {
+                        setSelectedCreditor(contact)
+                        setIsPaymentModalOpen(true)
+                      }}
+                    >
+                      PayMi
+                    </button>
                   </div>
                 )
               })}
@@ -397,6 +407,24 @@ export default function ContactsPage() {
               + Add Contact
             </button>
           </div>
+        )}
+
+        {/* Debt Payment Modal */}
+        {selectedCreditor && (
+          <DebtPaymentModal
+            isOpen={isPaymentModalOpen}
+            onClose={() => {
+              setIsPaymentModalOpen(false)
+              setSelectedCreditor(null)
+            }}
+            creditor={selectedCreditor}
+            totalDebt={selectedCreditor.total_debt || 0}
+            paidBack={selectedCreditor.paid_back || 0}
+            onPaymentSuccess={(amount) => {
+              // Reload contacts to show updated debt
+              loadContacts()
+            }}
+          />
         )}
       </div>
     </div>
